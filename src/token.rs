@@ -156,16 +156,16 @@ impl Token {
         })
     }
 
-    pub fn add_caveat(&self, caveat: &Caveat) -> Token {
+    pub fn add_caveat(&self, caveat: Caveat) -> Token {
         let Tag(key_bytes) = self.tag;
         let mut new_caveats = self.caveats.to_vec();
 
-        let new_tag = match caveat.caveat_key {
+        let new_tag = match caveat.caveat_key.clone() {
             Some(ref key) => {
                 let Tag(personalized_key) = authenticate(&key, &Key(*KEY_GENERATOR));
                 let nonce = secretbox::gen_nonce();
 
-                let mut new_caveat = caveat.clone();
+                let mut new_caveat = caveat;
                 let verification_id =
                     secretbox::seal(&key_bytes,
                                     &nonce,
@@ -202,7 +202,7 @@ impl Token {
         let mut verify_token = Token::new(&key, self.identifier.clone(), self.location.clone());
 
         for caveat in &self.caveats {
-            verify_token = verify_token.add_caveat(&caveat)
+            verify_token = verify_token.add_caveat(caveat.clone())
         }
 
         verify_token.tag == self.tag
