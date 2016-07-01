@@ -38,8 +38,7 @@ fn example_first_party_caveat_different_prefix() -> Caveat {
 }
 
 fn verify_caveat(p: &Predicate) -> bool {
-    let mut prefix = p.0.clone();
-    let value = prefix.split_off(7);
+    let (prefix, value) = p.0.split_at(7);
     
     if prefix != b"test = " {
         return true;
@@ -49,8 +48,7 @@ fn verify_caveat(p: &Predicate) -> bool {
 }
 
 fn verify_wrong_value(p: &Predicate) -> bool {
-    let mut prefix = p.0.clone();
-    let value = prefix.split_off(7);
+    let (prefix, value) = p.0.split_at(7);
     
     if prefix != b"test = " {
         return true;
@@ -60,8 +58,7 @@ fn verify_wrong_value(p: &Predicate) -> bool {
 }
 
 fn verify_other(p: &Predicate) -> bool {
-    let mut prefix = p.0.clone();
-    let value = prefix.split_off(7);
+    let (prefix, value) = p.0.split_at(7);
     
     if prefix != b"other = " {
         return true;
