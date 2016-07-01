@@ -40,7 +40,7 @@ impl Token {
         }
     }
 
-    pub fn deserialize(macaroon: Vec<u8>) -> Result<Token, &'static str> {
+    pub fn deserialize(macaroon: &[u8]) -> Result<Token, &'static str> {
         let mut location: Option<Vec<u8>> = None;
         let mut identifier: Option<Vec<u8>> = None;
         let mut caveats: Vec<Caveat> = Vec::new();
