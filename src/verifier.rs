@@ -8,8 +8,29 @@ pub struct Verifier {
 }
 
 impl Verifier {
-    pub fn new(matchers: Vec<Box<CaveatVerifier>>) -> Verifier {
+    pub fn new() -> Verifier {
+        Self::with_matchers(Vec::new())
+    }
+
+    pub fn with_matchers(matchers: Vec<Box<CaveatVerifier>>) -> Verifier {
         Verifier { matchers: matchers }
+    }
+
+    pub fn add_matcher<M>(self, matcher: M) -> Verifier where
+        M: Fn(&str) -> bool + 'static
+    {
+        self.add_byte_matcher(move |caveat|
+            ::std::str::from_utf8(&caveat.0)
+            .map(&matcher)
+            .unwrap_or(false)
+        )
+    }
+
+    pub fn add_byte_matcher<M>(mut self, matcher: M) -> Verifier where
+        M: Fn(&Predicate) -> bool + 'static
+    {
+        self.matchers.push(Box::new(matcher));
+        self
     }
         
     pub fn verify(&self, key: &[u8], token: &Token) -> bool {
