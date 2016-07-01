@@ -156,16 +156,16 @@ impl Token {
         })
     }
 
-    pub fn add_caveat(&self, caveat: Caveat) -> Token {
+    pub fn add_caveat(mut self, mut caveat: Caveat) -> Token {
         let Tag(key_bytes) = self.tag;
-        let mut new_caveats = self.caveats.to_vec();
 
-        let new_tag = match caveat.caveat_key.clone() {
-            Some(ref key) => {
+        self.tag = match caveat.caveat_key.take() {
+            Some(key) => {
                 let Tag(personalized_key) = authenticate(&key, &Key(*KEY_GENERATOR));
                 let nonce = secretbox::gen_nonce();
 
-                let mut new_caveat = caveat;
+                caveat.caveat_key = Some(key);
+
                 let verification_id =
                     secretbox::seal(&key_bytes,
                                     &nonce,
@@ -173,29 +173,24 @@ impl Token {
 
                 let mut caveat_authenticator = State::init(&key_bytes);
 
-                let Tag(caveat_id_tag) = authenticate(&new_caveat.caveat_id, &Key(key_bytes));
+                let Tag(caveat_id_tag) = authenticate(&caveat.caveat_id, &Key(key_bytes));
                 caveat_authenticator.update(&caveat_id_tag);
 
                 let Tag(verification_id_tag) = authenticate(&verification_id, &Key(key_bytes));
                 caveat_authenticator.update(&verification_id_tag);
 
-                new_caveat.verification_id = Some(verification_id);
+                caveat.verification_id = Some(verification_id);
 
-                new_caveats.push(new_caveat);
+                self.caveats.push(caveat);
                 caveat_authenticator.finalize()
             }
             None => {
-                new_caveats.push(caveat.clone());
+                self.caveats.push(caveat.clone());
                 authenticate(&caveat.caveat_id, &Key(key_bytes))
             }
         };
 
-        Token {
-            identifier: self.identifier.clone(),
-            location: self.location.clone(),
-            caveats: new_caveats,
-            tag: new_tag,
-        }
+        self
     }
 
     pub fn verify(&self, key: &[u8]) -> bool {
