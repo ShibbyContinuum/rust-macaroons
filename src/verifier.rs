@@ -1,7 +1,7 @@
 pub use token::Token;
-pub use caveat::{Caveat, Predicate};
+pub use caveat::Caveat;
 
-pub type CaveatVerifier = Fn(&Predicate) -> bool;
+pub type CaveatVerifier = Fn(&[u8]) -> bool;
 
 pub struct Verifier {
     pub matchers: Vec<Box<CaveatVerifier>>,
@@ -20,14 +20,14 @@ impl Verifier {
         M: Fn(&str) -> bool + 'static
     {
         self.add_byte_matcher(move |caveat|
-            ::std::str::from_utf8(&caveat.0)
+            ::std::str::from_utf8(&caveat)
             .map(&matcher)
             .unwrap_or(false)
         )
     }
 
     pub fn add_byte_matcher<M>(mut self, matcher: M) -> Verifier where
-        M: Fn(&Predicate) -> bool + 'static
+        M: Fn(&[u8]) -> bool + 'static
     {
         self.matchers.push(Box::new(matcher));
         self
@@ -53,7 +53,7 @@ impl Verifier {
     fn verify_first_party(&self, c: &Caveat) -> bool {
         let matchers = &self.matchers;
         for m in matchers {
-            if m(&Predicate(c.caveat_id.clone())) {
+            if m(&c.caveat_id) {
                 return true;
             }
         }

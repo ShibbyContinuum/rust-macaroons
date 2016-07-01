@@ -1,6 +1,6 @@
 extern crate macaroons;
 pub use macaroons::token::{Token, Tag};
-pub use macaroons::caveat::{Caveat, Predicate};
+pub use macaroons::caveat::Caveat;
 pub use macaroons::verifier::Verifier;
 
 const EMPTY_TAG: [u8; 32] = [0xe3, 0xd9, 0xe0, 0x29, 0x08, 0x52, 0x6c, 0x4c, 0x00, 0x39, 0xae,
@@ -30,11 +30,11 @@ fn example_uri() -> Vec<u8> {
 }
 
 fn example_first_party_caveat() -> Caveat {
-    Caveat::first_party(Predicate(Vec::from("test = caveat")))
+    Caveat::first_party(Vec::from("test = caveat"))
 }
 
 fn example_first_party_caveat_different_prefix() -> Caveat {
-    Caveat::first_party(Predicate(Vec::from("other = test")))
+    Caveat::first_party(Vec::from("other = test"))
 }
 
 fn verify_caveat(p: &str) -> bool {

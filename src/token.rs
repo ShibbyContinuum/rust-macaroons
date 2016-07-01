@@ -1,6 +1,6 @@
 use std;
 
-pub use caveat::{Caveat, Predicate};
+pub use caveat::Caveat;
 
 use rustc_serialize::base64::{self, FromBase64, ToBase64};
 
@@ -64,7 +64,7 @@ impl Token {
             match &packet.id[..] {
                 b"location" => location = Some(packet.value),
                 b"identifier" => identifier = Some(packet.value),
-                b"cid" => caveats.push(Caveat::first_party(Predicate(packet.value))),
+                b"cid" => caveats.push(Caveat::first_party(packet.value)),
                 b"vid" | b"cl" => {
                     match caveats.pop() {
                         Some(caveat) => {
