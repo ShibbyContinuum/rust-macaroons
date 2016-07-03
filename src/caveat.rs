@@ -1,9 +1,6 @@
 use std::fmt;
 
 #[derive(Clone)]
-pub struct Predicate(pub Vec<u8>);
-
-#[derive(Clone)]
 pub struct Caveat {
     pub caveat_id: Vec<u8>,
     pub caveat_key: Option<Vec<u8>>,
@@ -12,11 +9,9 @@ pub struct Caveat {
 }
 
 impl Caveat {
-    pub fn first_party(predicate: Predicate) -> Caveat {
-        let Predicate(caveat_id) = predicate;
-
+    pub fn first_party(predicate: Vec<u8>) -> Caveat {
         Caveat {
-            caveat_id: caveat_id,
+            caveat_id: predicate,
             caveat_key: None,
             verification_id: None,
             caveat_location: None,
