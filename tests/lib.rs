@@ -105,7 +105,7 @@ fn empty_macaroon_signature() {
 
 #[test]
 fn signature_with_first_party_caveat() {
-    let token = example_token().add_caveat(&example_first_party_caveat());
+    let token = example_token().add_caveat(example_first_party_caveat());
     let Tag(actual_tag) = token.tag;
     assert_eq!(EXPECTED_TAG_WITH_FIRST_PARTY_CAVEATS, actual_tag)
 }
@@ -114,8 +114,8 @@ fn signature_with_first_party_caveat() {
 fn signature_with_third_party_caveat() {
     let mut token = example_token();
 
-    token = token.add_caveat(&example_first_party_caveat());
-    token = token.add_caveat(&example_third_party_caveat());
+    token = token.add_caveat(example_first_party_caveat());
+    token = token.add_caveat(example_third_party_caveat());
 
     let token_serialized = token.serialize();
     let parsed_token = Token::deserialize(token_serialized.as_bytes()).unwrap();
@@ -129,7 +129,7 @@ fn signature_with_third_party_caveat() {
 
 #[test]
 fn binary_serialization() {
-    let token = example_token().add_caveat(&example_first_party_caveat());
+    let token = example_token().add_caveat(example_first_party_caveat());
     assert_eq!(example_serialized_with_first_party_caveats(),
                token.serialize());
 }
@@ -147,7 +147,7 @@ fn binary_deserialization() {
 
 #[test]
 fn simple_verification() {
-    let token = example_token().add_caveat(&example_first_party_caveat());
+    let token = example_token().add_caveat(example_first_party_caveat());
 
     assert!(token.verify(&example_key()), "verifies with valid key");
     assert!(!token.verify(&invalid_key()),
@@ -157,8 +157,8 @@ fn simple_verification() {
 #[test]
 fn verifying_predicates() {
     let token = example_token()
-        .add_caveat(&example_first_party_caveat())
-        .add_caveat(&example_first_party_caveat_different_prefix());
+        .add_caveat(example_first_party_caveat())
+        .add_caveat(example_first_party_caveat_different_prefix());
 
     let matching_verifier = Verifier::new(vec![Box::new(verify_caveat)]);
     assert!(matching_verifier.verify(&example_key(), &token));
