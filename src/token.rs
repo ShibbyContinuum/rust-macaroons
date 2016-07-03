@@ -40,7 +40,7 @@ impl Token {
         }
     }
 
-    pub fn deserialize(macaroon: Vec<u8>) -> Result<Token, &'static str> {
+    pub fn deserialize(macaroon: &[u8]) -> Result<Token, &'static str> {
         let mut location: Option<Vec<u8>> = None;
         let mut identifier: Option<Vec<u8>> = None;
         let mut caveats: Vec<Caveat> = Vec::new();
@@ -208,7 +208,7 @@ impl Token {
         verify_token.tag == self.tag
     }
 
-    pub fn serialize(&self) -> Vec<u8> {
+    pub fn serialize(&self) -> String {
         // TODO: estimate capacity and use Vec::with_capacity
         let mut result: Vec<u8> = Vec::new();
 
@@ -236,7 +236,7 @@ impl Token {
         let Tag(signature) = self.tag;
         Token::packetize(&mut result, "signature", &signature.to_vec());
 
-        result.to_base64(base64::URL_SAFE).into_bytes()
+        result.to_base64(base64::URL_SAFE)
     }
 
     fn packetize(result: &mut Vec<u8>, field: &str, value: &[u8]) {

@@ -38,8 +38,7 @@ fn example_first_party_caveat_different_prefix() -> Caveat {
 }
 
 fn verify_caveat(p: &Predicate) -> bool {
-    let mut prefix = p.0.clone();
-    let value = prefix.split_off(7);
+    let (prefix, value) = p.0.split_at(7);
     
     if prefix != b"test = " {
         return true;
@@ -49,8 +48,7 @@ fn verify_caveat(p: &Predicate) -> bool {
 }
 
 fn verify_wrong_value(p: &Predicate) -> bool {
-    let mut prefix = p.0.clone();
-    let value = prefix.split_off(7);
+    let (prefix, value) = p.0.split_at(7);
     
     if prefix != b"test = " {
         return true;
@@ -60,8 +58,7 @@ fn verify_wrong_value(p: &Predicate) -> bool {
 }
 
 fn verify_other(p: &Predicate) -> bool {
-    let mut prefix = p.0.clone();
-    let value = prefix.split_off(7);
+    let (prefix, value) = p.0.split_at(7);
     
     if prefix != b"other = " {
         return true;
@@ -92,10 +89,10 @@ fn example_token() -> Token {
     Token::new(&example_key(), example_id(), Some(example_uri()))
 }
 
-fn example_serialized_with_first_party_caveats() -> Vec<u8> {
-    Vec::from("MDAxY2xvY2F0aW9uIGh0dHA6Ly9teWJhbmsvCjAwMjZpZGVudGlmaWVyIHdlIHVzZWQgb3VyIHNlY3JldCB\
-               rZXkKMDAxNmNpZCB0ZXN0ID0gY2F2ZWF0CjAwMmZzaWduYXR1cmUgGXusegRK8zMyhluSZuJtSTvdZopmDk\
-               TYjOGpmMI9vWcK")
+fn example_serialized_with_first_party_caveats() -> &'static str {
+    "MDAxY2xvY2F0aW9uIGh0dHA6Ly9teWJhbmsvCjAwMjZpZGVudGlmaWVyIHdlIHVzZWQgb3VyIHNlY3JldCB\
+     rZXkKMDAxNmNpZCB0ZXN0ID0gY2F2ZWF0CjAwMmZzaWduYXR1cmUgGXusegRK8zMyhluSZuJtSTvdZopmDk\
+     TYjOGpmMI9vWcK"
 }
 
 #[test]
@@ -121,7 +118,7 @@ fn signature_with_third_party_caveat() {
     token = token.add_caveat(&example_third_party_caveat());
 
     let token_serialized = token.serialize();
-    let parsed_token = Token::deserialize(token_serialized).unwrap();
+    let parsed_token = Token::deserialize(token_serialized.as_bytes()).unwrap();
     let third_party_caveat = &parsed_token.caveats[1];
 
     assert_eq!(third_party_caveat.caveat_id,
@@ -139,7 +136,7 @@ fn binary_serialization() {
 
 #[test]
 fn binary_deserialization() {
-    let token = Token::deserialize(example_serialized_with_first_party_caveats()).unwrap();
+    let token = Token::deserialize(example_serialized_with_first_party_caveats().as_bytes()).unwrap();
 
     assert_eq!(example_uri(), token.location.unwrap());
     assert_eq!(example_id(), token.identifier);
