@@ -185,8 +185,9 @@ impl Token {
                 caveat_authenticator.finalize()
             }
             None => {
-                self.caveats.push(caveat.clone());
-                authenticate(&caveat.caveat_id, &Key(key_bytes))
+                let tag = authenticate(&caveat.caveat_id, &Key(key_bytes));
+                self.caveats.push(caveat);
+                tag
             }
         };
 
