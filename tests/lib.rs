@@ -1,7 +1,7 @@
 extern crate macaroons;
 pub use macaroons::token::{Token, Tag};
 pub use macaroons::caveat::Caveat;
-pub use macaroons::verifier::Verifier;
+use macaroons::verifier::*;
 
 const EMPTY_TAG: [u8; 32] = [0xe3, 0xd9, 0xe0, 0x29, 0x08, 0x52, 0x6c, 0x4c, 0x00, 0x39, 0xae,
                              0x15, 0x11, 0x41, 0x15, 0xd9, 0x7f, 0xdd, 0x68, 0xbf, 0x2b, 0xa3,
@@ -144,9 +144,8 @@ fn binary_deserialization() {
 fn simple_verification() {
     let token = example_token().add_caveat(example_first_party_caveat());
 
-    assert!(token.verify(EXAMPLE_KEY), "verifies with valid key");
-    assert!(!token.verify(INVALID_KEY),
-            "doesn't verify with invalid key");
+    assert!(token.verify_integrity(EXAMPLE_KEY), "verifies with valid key");
+    assert!(!token.verify_integrity(INVALID_KEY), "doesn't verify with invalid key");
 }
 
 #[test]
@@ -155,17 +154,14 @@ fn verifying_predicates() {
         .add_caveat(example_first_party_caveat())
         .add_caveat(example_first_party_caveat_different_prefix());
 
-    let matching_verifier = Verifier::new().add_matcher(verify_caveat);
-    assert!(matching_verifier.verify(EXAMPLE_KEY, &token));
-    assert!(!matching_verifier.verify(INVALID_KEY, &token));
+    let matching_verifier = Func(verify_caveat);
+    assert!(token.verify(EXAMPLE_KEY, &matching_verifier));
+    assert!(!token.verify(INVALID_KEY, &matching_verifier));
     
-    let non_matching_verifier = Verifier::new().add_matcher(verify_wrong_value);
-    assert!(!non_matching_verifier.verify(EXAMPLE_KEY, &token));
-    assert!(!non_matching_verifier.verify(INVALID_KEY, &token));
+    let non_matching_verifier = Func(verify_wrong_value);
+    assert!(!token.verify(EXAMPLE_KEY, &non_matching_verifier));
+    assert!(!token.verify(INVALID_KEY, &non_matching_verifier));
 
-    let multiple_verifier = Verifier::new()
-        .add_matcher(verify_caveat)
-        .add_matcher(verify_other);
-    assert!(multiple_verifier.verify(EXAMPLE_KEY, &token));
-
+    let multiple_verifier = Func(verify_caveat).link(Func(verify_other));
+    assert!(token.verify(EXAMPLE_KEY, multiple_verifier));
 }

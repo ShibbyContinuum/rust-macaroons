@@ -1,6 +1,7 @@
 use std;
 
 pub use caveat::Caveat;
+use verifier::Verifier;
 
 use rustc_serialize::base64::{self, FromBase64, ToBase64};
 
@@ -194,7 +195,26 @@ impl Token {
         self
     }
 
-    pub fn verify(&self, key: &[u8]) -> bool {
+    pub fn verify<V: Verifier>(&self, key: &[u8], verifier: V) -> bool {
+        if !self.verify_integrity(&key) {
+            return false;
+        }
+
+        for caveat in &self.caveats {
+            let verified = match caveat.verification_id {
+                None => verifier.verify(&caveat.caveat_id),
+                _ => unimplemented!()
+            };
+
+            if verified == false {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    pub fn verify_integrity(&self, key: &[u8]) -> bool {
         let mut verify_token = Token::new(&key, self.identifier.clone(), self.location.clone());
 
         for caveat in &self.caveats {
