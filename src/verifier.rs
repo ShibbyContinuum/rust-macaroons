@@ -82,7 +82,7 @@ impl<V1: Verifier, V2: Verifier> Verifier for LinkedVerifier<V1, V2> {
 
 // Eq
 
-pub struct Eq<Tag: AsRef<[u8]>, Value: AsRef<[u8]>>(Tag, Value);
+pub struct Eq<Tag: AsRef<[u8]>, Value: AsRef<[u8]>>(pub Tag, pub Value);
 
 impl<Tag: AsRef<[u8]>, Value: AsRef<[u8]>> Verifier for Eq<Tag, Value> {
     fn verify(&self, caveat: &[u8]) -> bool {
