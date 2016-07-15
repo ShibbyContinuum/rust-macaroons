@@ -47,7 +47,7 @@ impl<F> Verifier for Func<F> where
 
 // ByteFunc
 
-pub struct ByteFunc<F: Fn(&[u8]) -> bool>(F);
+pub struct ByteFunc<F: Fn(&[u8]) -> bool>(pub F);
 
 impl<F> Verifier for ByteFunc<F> where
     F: Fn(&[u8]) -> bool
