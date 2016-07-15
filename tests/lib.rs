@@ -13,13 +13,8 @@ const EXPECTED_TAG_WITH_FIRST_PARTY_CAVEATS: [u8; 32] = [0x19, 0x7b, 0xac, 0x7a,
                                                          0x0e, 0x44, 0xd8, 0x8c, 0xe1, 0xa9, 0x98,
                                                          0xc2, 0x3d, 0xbd, 0x67];
 
-fn example_key() -> Vec<u8> {
-    Vec::from("this is our super secret key; only we should know it")
-}
-
-fn invalid_key() -> Vec<u8> {
-    Vec::from("this is not the key you are looking for; it is evil")
-}
+const EXAMPLE_KEY: &'static [u8] = b"this is our super secret key; only we should know it";
+const INVALID_KEY: &'static [u8] = b"this is not the key you are looking for; it is evil";
 
 fn example_id() -> Vec<u8> {
     Vec::from("we used our secret key")
@@ -86,7 +81,7 @@ fn example_third_party_caveat() -> Caveat {
 }
 
 fn example_token() -> Token {
-    Token::new(&example_key(), example_id(), Some(example_uri()))
+    Token::new(EXAMPLE_KEY, example_id(), Some(example_uri()))
 }
 
 fn example_serialized_with_first_party_caveats() -> &'static str {
@@ -97,7 +92,7 @@ fn example_serialized_with_first_party_caveats() -> &'static str {
 
 #[test]
 fn empty_macaroon_signature() {
-    let token = Token::new(&example_key(), example_id(), Some(example_uri()));
+    let token = Token::new(EXAMPLE_KEY, example_id(), Some(example_uri()));
     let Tag(actual_tag) = token.tag;
 
     assert_eq!(EMPTY_TAG, actual_tag)
@@ -149,8 +144,8 @@ fn binary_deserialization() {
 fn simple_verification() {
     let token = example_token().add_caveat(example_first_party_caveat());
 
-    assert!(token.verify(&example_key()), "verifies with valid key");
-    assert!(!token.verify(&invalid_key()),
+    assert!(token.verify(EXAMPLE_KEY), "verifies with valid key");
+    assert!(!token.verify(INVALID_KEY),
             "doesn't verify with invalid key");
 }
 
@@ -161,16 +156,16 @@ fn verifying_predicates() {
         .add_caveat(example_first_party_caveat_different_prefix());
 
     let matching_verifier = Verifier::new().add_matcher(verify_caveat);
-    assert!(matching_verifier.verify(&example_key(), &token));
-    assert!(!matching_verifier.verify(&invalid_key(), &token));
+    assert!(matching_verifier.verify(EXAMPLE_KEY, &token));
+    assert!(!matching_verifier.verify(INVALID_KEY, &token));
     
     let non_matching_verifier = Verifier::new().add_matcher(verify_wrong_value);
-    assert!(!non_matching_verifier.verify(&example_key(), &token));
-    assert!(!non_matching_verifier.verify(&invalid_key(), &token));
+    assert!(!non_matching_verifier.verify(EXAMPLE_KEY, &token));
+    assert!(!non_matching_verifier.verify(INVALID_KEY, &token));
 
     let multiple_verifier = Verifier::new()
         .add_matcher(verify_caveat)
         .add_matcher(verify_other);
-    assert!(multiple_verifier.verify(&example_key(), &token));
+    assert!(multiple_verifier.verify(EXAMPLE_KEY, &token));
 
 }
