@@ -13,6 +13,12 @@ impl<'a, V: Verifier> Verifier for &'a V {
     }
 }
 
+impl<'a, V: Verifier> Verifier for &'a mut V {
+    fn verify(&self, caveat: &[u8]) -> bool {
+        (**self).verify(caveat)
+    }
+}
+
 impl<V: Verifier> Verifier for Box<V> {
     fn verify(&self, caveat: &[u8]) -> bool {
         (**self).verify(caveat)
