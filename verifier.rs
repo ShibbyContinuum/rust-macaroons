@@ -124,7 +124,7 @@ impl<Tag: AsRef<[u8]>, Value: AsRef<[u8]>> Verifier for Lt<Tag, Value> {
 
 // Gt
 
-pub struct Gt<Tag:: AsRef<[u8]>, Value: AsRef<[u8]>>(pub Tag, pub Value);
+pub struct Gt<Tag: AsRef<[u8]>, Value: AsRef<[u8]>>(pub Tag, pub Value);
 
 impl<Tag: AsRef<[u8]>, Value: AsRef<[u8]>> Verifier for Gt<Tag, Value> {
     fn verify(&self, caveat:&[u8]) -> bool {
